@@ -742,5 +742,243 @@
       });
     });
   </script>
+
+  <!-- ── AI CHAT WIDGET ── -->
+  <style>
+    #dv-chat-btn {
+      position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, #1877C8, #5cb3ff);
+      border: none; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(24,119,200,.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .2s, box-shadow .2s;
+    }
+    #dv-chat-btn:hover { transform: scale(1.08); box-shadow: 0 10px 32px rgba(24,119,200,.6); }
+    #dv-chat-btn svg { width: 28px; height: 28px; fill: #fff; }
+    #dv-chat-btn .dv-close-icon { display: none; }
+    #dv-chat-btn.open .dv-chat-icon { display: none; }
+    #dv-chat-btn.open .dv-close-icon { display: block; }
+
+    #dv-chat-box {
+      position: fixed; bottom: 100px; right: 28px; z-index: 999;
+      width: 360px; max-width: calc(100vw - 40px);
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 16px 60px rgba(9,30,66,.2);
+      display: none; flex-direction: column;
+      overflow: hidden; border: 1px solid #e2e8f0;
+      animation: dvSlideUp .25s ease;
+    }
+    #dv-chat-box.open { display: flex; }
+    @keyframes dvSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .dv-chat-header {
+      background: linear-gradient(135deg, #0D2B5E, #1877C8);
+      padding: 16px 18px; display: flex; align-items: center; gap: 12px;
+    }
+    .dv-chat-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .dv-chat-header-info h4 { color: #fff; font-size: .95rem; font-weight: 700; margin: 0; }
+    .dv-chat-header-info p { color: rgba(255,255,255,.7); font-size: .75rem; margin: 2px 0 0; }
+    .dv-online-dot {
+      width: 8px; height: 8px; background: #4ade80; border-radius: 50%;
+      display: inline-block; margin-right: 5px;
+    }
+
+    .dv-chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      max-height: 340px; min-height: 200px;
+      background: #f8fafc;
+    }
+    .dv-chat-messages::-webkit-scrollbar { width: 4px; }
+    .dv-chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .dv-msg { display: flex; gap: 8px; align-items: flex-end; max-width: 88%; }
+    .dv-msg.bot { align-self: flex-start; }
+    .dv-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .dv-msg-avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #0D2B5E, #1877C8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; color: #fff; font-weight: 700;
+    }
+    .dv-bubble {
+      padding: 10px 14px; border-radius: 14px;
+      font-size: .88rem; line-height: 1.55; font-family: 'Inter', sans-serif;
+    }
+    .dv-msg.bot .dv-bubble {
+      background: #fff; color: #1e293b;
+      border: 1px solid #e2e8f0;
+      border-bottom-left-radius: 4px;
+    }
+    .dv-msg.user .dv-bubble {
+      background: linear-gradient(135deg, #1877C8, #2d8fdf);
+      color: #fff; border-bottom-right-radius: 4px;
+    }
+
+    .dv-typing {
+      display: flex; gap: 4px; align-items: center;
+      padding: 10px 14px; background: #fff;
+      border: 1px solid #e2e8f0; border-radius: 14px; border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+    .dv-typing span {
+      width: 7px; height: 7px; background: #94a3b8; border-radius: 50%;
+      animation: dvBounce 1.2s infinite ease-in-out;
+    }
+    .dv-typing span:nth-child(2) { animation-delay: .2s; }
+    .dv-typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes dvBounce {
+      0%,60%,100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    .dv-chat-input-area {
+      padding: 12px 14px; border-top: 1px solid #e2e8f0;
+      display: flex; gap: 8px; align-items: center; background: #fff;
+    }
+    #dv-chat-input {
+      flex: 1; border: 1.5px solid #e2e8f0; border-radius: 24px;
+      padding: 9px 16px; font-size: .88rem; font-family: 'Inter', sans-serif;
+      outline: none; color: #1e293b; resize: none;
+      transition: border-color .2s;
+    }
+    #dv-chat-input:focus { border-color: #1877C8; }
+    #dv-chat-send {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: #1877C8; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .15s;
+    }
+    #dv-chat-send:hover { background: #1565b0; transform: scale(1.08); }
+    #dv-chat-send svg { width: 16px; height: 16px; fill: #fff; }
+
+    .dv-chat-footer {
+      text-align: center; padding: 6px 0 8px;
+      font-size: .7rem; color: #94a3b8; background: #fff;
+    }
+  </style>
+
+  <!-- Chat Toggle Button -->
+  <button id="dv-chat-btn" onclick="dvToggleChat()" aria-label="Open AI Chat">
+    <svg class="dv-chat-icon" viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm-2 10H6V10h12v2zm0-4H6V6h12v2z"/></svg>
+    <svg class="dv-close-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+  </button>
+
+  <!-- Chat Box -->
+  <div id="dv-chat-box">
+    <div class="dv-chat-header">
+      <div class="dv-chat-avatar">🤖</div>
+      <div class="dv-chat-header-info">
+        <h4>DigitalVerse AI Assistant</h4>
+        <p><span class="dv-online-dot"></span>Online — Ask me anything!</p>
+      </div>
+    </div>
+    <div class="dv-chat-messages" id="dv-messages">
+      <div class="dv-msg bot">
+        <div class="dv-msg-avatar">DV</div>
+        <div class="dv-bubble">Hi there! 👋 I'm the DigitalVerse AI Assistant. Ask me anything about our services, pricing, or how we can help automate your business!</div>
+      </div>
+    </div>
+    <div class="dv-chat-input-area">
+      <input id="dv-chat-input" type="text" placeholder="Type your message..." maxlength="500" onkeydown="if(event.key==='Enter') dvSend()" />
+      <button id="dv-chat-send" onclick="dvSend()" aria-label="Send">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="dv-chat-footer">Powered by DigitalVerse AI · <a href="#contact" style="color:#1877C8;text-decoration:none;" onclick="dvToggleChat()">Talk to a human</a></div>
+  </div>
+
+  <script>
+    const DV_WEBHOOK = 'https://n8n.jessiepongaron.cloud/webhook/digitalverse-chat';
+
+    function dvToggleChat() {
+      const box = document.getElementById('dv-chat-box');
+      const btn = document.getElementById('dv-chat-btn');
+      const isOpen = box.classList.contains('open');
+      box.classList.toggle('open');
+      btn.classList.toggle('open');
+      if (!isOpen) {
+        setTimeout(() => document.getElementById('dv-chat-input').focus(), 300);
+      }
+    }
+
+    function dvAppendMsg(role, text) {
+      const container = document.getElementById('dv-messages');
+      const wrap = document.createElement('div');
+      wrap.className = 'dv-msg ' + role;
+      const avatar = document.createElement('div');
+      avatar.className = 'dv-msg-avatar';
+      avatar.textContent = role === 'bot' ? 'DV' : 'You';
+      const bubble = document.createElement('div');
+      bubble.className = 'dv-bubble';
+      bubble.textContent = text;
+      wrap.appendChild(avatar);
+      wrap.appendChild(bubble);
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+      return wrap;
+    }
+
+    function dvShowTyping() {
+      const container = document.getElementById('dv-messages');
+      const wrap = document.createElement('div');
+      wrap.className = 'dv-msg bot';
+      wrap.id = 'dv-typing-indicator';
+      const avatar = document.createElement('div');
+      avatar.className = 'dv-msg-avatar';
+      avatar.textContent = 'DV';
+      const typing = document.createElement('div');
+      typing.className = 'dv-typing';
+      typing.innerHTML = '<span></span><span></span><span></span>';
+      wrap.appendChild(avatar);
+      wrap.appendChild(typing);
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function dvRemoveTyping() {
+      const el = document.getElementById('dv-typing-indicator');
+      if (el) el.remove();
+    }
+
+    async function dvSend() {
+      const input = document.getElementById('dv-chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      input.disabled = true;
+      document.getElementById('dv-chat-send').disabled = true;
+
+      dvAppendMsg('user', msg);
+      dvShowTyping();
+
+      try {
+        const res = await fetch(DV_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        dvRemoveTyping();
+        dvAppendMsg('bot', data.reply || "Sorry, I couldn't get a response. Please try again or reach out to us directly.");
+      } catch (err) {
+        dvRemoveTyping();
+        dvAppendMsg('bot', "Sorry, I'm having trouble connecting right now. Please email us at cocmedeadcode6@gmail.com and we'll get back to you shortly!");
+      }
+
+      input.disabled = false;
+      document.getElementById('dv-chat-send').disabled = false;
+      input.focus();
+    }
+  </script>
 </body>
 </html>
