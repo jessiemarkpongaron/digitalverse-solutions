@@ -60,8 +60,8 @@
     /* ── HERO ── */
     .hero {
       position: relative; min-height: 100vh;
-      display: flex; align-items: flex-end; justify-content: center;
-      text-align: center; padding: 0 6vw 90px;
+      display: flex; align-items: flex-start; justify-content: center;
+      text-align: center; padding: 140px 6vw 80px;
       overflow: hidden;
     }
     .hero-bg {
@@ -70,7 +70,13 @@
     }
     .hero-overlay {
       position: absolute; inset: 0;
-      background: rgba(9,30,66,0.80);
+      background: linear-gradient(
+        to bottom,
+        rgba(9,30,66,0.85) 0%,
+        rgba(9,30,66,0.80) 35%,
+        rgba(9,30,66,0.30) 65%,
+        rgba(9,30,66,0.10) 100%
+      );
     }
     .hero-content { position: relative; z-index: 1; max-width: 780px; }
     .hero-badge {
