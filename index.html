@@ -60,8 +60,9 @@
     /* ── HERO ── */
     .hero {
       position: relative; min-height: 100vh;
-      display: flex; align-items: flex-start; justify-content: center;
-      text-align: center; padding: 140px 6vw 80px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: space-between;
+      text-align: center; padding: 140px 6vw 60px;
       overflow: hidden;
     }
     .hero-bg {
@@ -72,13 +73,14 @@
       position: absolute; inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(9,30,66,0.85) 0%,
-        rgba(9,30,66,0.80) 35%,
+        rgba(9,30,66,0.82) 0%,
+        rgba(9,30,66,0.30) 35%,
         rgba(9,30,66,0.30) 65%,
-        rgba(9,30,66,0.10) 100%
+        rgba(9,30,66,0.85) 100%
       );
     }
-    .hero-content { position: relative; z-index: 1; max-width: 780px; }
+    .hero-top { position: relative; z-index: 1; max-width: 780px; }
+    .hero-bottom { position: relative; z-index: 1; max-width: 780px; }
     .hero-badge {
       display: inline-block;
       background: rgba(24,119,200,.25);
@@ -331,15 +333,22 @@
   <section id="home" class="hero">
     <div class="hero-bg"></div>
     <div class="hero-overlay"></div>
-    <div class="hero-content">
+
+    <!-- TOP: badge + heading -->
+    <div class="hero-top">
       <div class="hero-badge">AI Automation Agency</div>
       <h1>Automate Smarter.<br /><span>Scale Faster.</span></h1>
+    </div>
+
+    <!-- BOTTOM: paragraph + buttons, sits below banner's "Fixing the future of today" -->
+    <div class="hero-bottom">
       <p>DigitalVerse Solutions builds AI-powered workflows and intelligent agents that eliminate busywork so you can focus on what matters.</p>
       <div class="hero-btns">
         <a href="#contact" class="btn-primary">Get a Free Consultation</a>
         <a href="#services" class="btn-outline">See Our Services</a>
       </div>
     </div>
+
     <div class="hero-scroll">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
       scroll
